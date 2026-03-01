@@ -38,3 +38,13 @@
 - Пример данных в description (формат JSONL строки) → парсер написан правильно с первого раза
 - Конкретные формулы в description (цены за 1M) → pricing без rework
 - Пример ожидаемого output в description (ASCII-таблица) → formatter без rework
+
+## Прогон #3: tg-parser article_gen (3 задачи, 2 фазы, 0 rework, ~14 мин)
+- Полный алгоритм в промпте (5 шагов кластеризации для analyzer) → 0 rework, воркер не додумывал
+- Конкретные имена тестов в промпте (8+ для reader, 6+ для analyzer) → воркеры писали нужные тесты, добавляли бонусные
+- Точные форматы входных данных (Telegram JSON структура, Markdown разбивка по ##) → парсер с первого раза
+- Пример шаблона статьи в промпте generator → fallback-генерация корректная
+- 10 acceptance_signals на задачу (file_exists + no_syntax_errors + file_min_lines + no_pattern) → автоматическая верификация без rework
+- Параллельный запуск analyzer + generator в фазе 2 сэкономил ~4 мин (но требует interface-файл, см. anti-patterns)
+- **Benchmark стоимости:** $32.33 за 1818 строк + 39 тестов = $0.018/строка. Воркеры 60%, Runner 18%, Reviewer 18%, Checkpoints 4%
+- Самый дорогой воркер (generator, $8.92) = самый большой scope (4 файла, 765 строк). Корреляция прямая

@@ -907,6 +907,10 @@ main() {
     [[ -n "$PLAN_FILE" ]] || die "Укажи файл плана: bash runner.sh plan.yaml"
     [[ -d "$BRAIN_DIR" ]] || die ".brain/ не найден. Запусти из корня проекта Orchestra"
 
+    # Записать активный путь для виджета
+    echo "$(pwd)" > "${HOME}/.orchestra-active-path"
+    log "INFO" "Active path: $(pwd) → ~/.orchestra-active-path"
+
     mkdir -p "$LOGS_DIR" "$SIGNALS_DIR" "$TASKS_DIR" "$PROMPTS_DIR" "$RESULTS_DIR" "$WORKERS_DIR"
 
     log "INFO" "═══════════════════════════════════════"

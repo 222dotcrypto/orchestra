@@ -1,14 +1,29 @@
 {
-  "status": "idle",
-  "current_task": null,
-  "class": null,
-  "current_phase": 0,
-  "phases": [],
+  "status": "done",
+  "current_task": "Hello World test",
+  "class": "4",
+  "current_phase": 2,
+  "phases": [
+    {
+      "id": 1,
+      "status": "done",
+      "tasks": [
+        "task-001"
+      ]
+    },
+    {
+      "id": 2,
+      "status": "done",
+      "tasks": [
+        "task-002"
+      ]
+    }
+  ],
   "workers_active": 0,
-  "tasks_total": 0,
+  "tasks_total": 2,
   "tasks_done": 0,
   "tasks_failed": 0,
-  "next_action": "Waiting for task",
-  "started_at": "",
-  "updated_at": ""
+  "next_action": "Завершено",
+  "started_at": "2026-03-01T10:07:22Z",
+  "updated_at": "2026-03-01T10:07:23Z"
 }

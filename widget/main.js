@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, Menu, screen } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const Store = require('electron-store');
 const AutoLaunch = require('auto-launch');
 const { fetchOrchestraData } = require('./src/orchestra-fetcher');
@@ -28,6 +29,15 @@ const FETCH_INTERVAL_MS = 5000;
 let currentFullHeight = WINDOW_HEIGHT_DEFAULT;
 
 function getOrchestraPath() {
+  // Приоритет: active-path файл от runner.sh → electron-store → ~/orchestra
+  const activePathFile = path.join(app.getPath('home'), '.orchestra-active-path');
+  try {
+    const activePath = fs.readFileSync(activePathFile, 'utf-8').trim();
+    if (activePath && fs.existsSync(path.join(activePath, '.brain'))) {
+      return activePath;
+    }
+  } catch {}
+
   let p = store.get('orchestraPath');
   if (p) return p;
   p = path.join(app.getPath('home'), 'orchestra');
