@@ -191,10 +191,12 @@ task-002 ──→ task-003
   "tasks_done": 0,
   "tasks_failed": 0,
   "next_action": "monitor tasks task-001, task-002",
-  "started_at": "ISO timestamp",
-  "updated_at": "ISO timestamp"
+  "started_at": "ТОЧНЫЙ текущий момент через date -u +%Y-%m-%dT%H:%M:%SZ",
+  "updated_at": "ТОЧНЫЙ текущий момент через date -u +%Y-%m-%dT%H:%M:%SZ"
 }
 ```
+
+**ВАЖНО: `started_at` и `updated_at`** — ВСЕГДА используй команду `date -u +%Y-%m-%dT%H:%M:%SZ` для получения точного UTC-времени. НЕ округляй, НЕ подставляй приблизительное значение. Виджет использует этот timestamp для подсчёта токенов.
 
 **Обновляй `next_action` при каждом переходе** — это страховка для cold restart.
 
@@ -270,7 +272,8 @@ bash .brain/scripts/check-workers.sh
 4. Обнови `state.json` → `status: "done"`
 5. Запиши метрики в `.brain/metrics.jsonl`
 6. Обнови `memory/patterns.md` или `memory/anti-patterns.md` если есть инсайты
-7. Покажи человеку: "Готово. Результат в output/. [краткое резюме]"
+7. Замерь стоимость прогона: `node output/token-calc/bin/tcalc.js --since "<started_at из state.json>" --breakdown` → покажи человеку
+8. Покажи человеку: "Готово. Результат в output/. Стоимость: $X. [краткое резюме]"
 
 ---
 

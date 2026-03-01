@@ -1,0 +1,25 @@
+{
+  "id": "task-004",
+  "phase": 2,
+  "title": "CLI entry point + package.json",
+  "description": "КОНТЕКСТ: Утилита tcalc подсчитывает стоимость токенов Orchestra. Модули parser.js, pricing.js, formatter.js уже написаны. Интерфейсы — в .brain/results/phase-1-interface.md.\n\nЗАДАЧА: Создай два файла:\n\n1. output/token-calc/bin/tcalc.js (с #!/usr/bin/env node)\nЧитает аргументы, вызывает модули, выводит отчёт.\n\nКоманды:\n- tcalc — все сессии текущего проекта. Определи проект: ищи ~/.claude/projects/ директорию, имя которой соответствует CWD (заменяя / на -). Без --breakdown: показать только TOTAL.\n- tcalc --breakdown — детализация по сессиям\n- tcalc --since \"2026-03-01T16:00:00Z\" — фильтровать сессии: parseSession каждого файла, если lastTimestamp < since — пропустить. Комбинируется с --breakdown.\n- tcalc --session <path> — подсчёт для одного JSONL файла\n\nАлгоритм:\n1. findSessions(projectDir) → paths\n2. Для каждого path: await parseSession(path)\n3. Для каждого результата: calculateCost(model, {input: totalInput, output: totalOutput, cacheCreation: totalCacheCreation, cacheRead: totalCacheRead})\n4. Добавить cost к каждому объекту сессии\n5. Если --since: отфильтровать по lastTimestamp\n6. formatReport(sessions, {breakdown}) → console.log\n\n2. output/token-calc/package.json\n{\"name\": \"tcalc\", \"version\": \"1.0.0\", \"bin\": {\"tcalc\": \"bin/tcalc.js\"}, \"description\": \"Token cost calculator for Orchestra\"}\n\nОГРАНИЧЕНИЯ:\n- НЕ трогай файлы вне owned_files\n- Только встроенные модули Node.js (fs, path, process)\n- Парсинг аргументов — вручную через process.argv\n- НЕ require readline — он уже в parser.js",
+  "role_required": "coder",
+  "assigned_to": "worker-04",
+  "status": "review",
+  "priority": "high",
+  "depends_on": ["task-001", "task-002", "task-003"],
+  "owned_files": ["output/token-calc/bin/tcalc.js", "output/token-calc/package.json"],
+  "acceptance_criteria": [
+    "output/token-calc/bin/tcalc.js существует и имеет shebang #!/usr/bin/env node",
+    "node output/token-calc/bin/tcalc.js выводит отчёт (без ошибок)",
+    "node output/token-calc/bin/tcalc.js --breakdown показывает детализацию по сессиям",
+    "node output/token-calc/bin/tcalc.js --session <path> работает с конкретным файлом",
+    "output/token-calc/package.json с bin полем"
+  ],
+  "context_files": [".brain/results/phase-1-interface.md", "output/token-calc/src/"],
+  "result_path": ".brain/results/task-004-result.md",
+  "rework_count": 0,
+  "rework_comment": "",
+  "created_at": "2026-03-01T12:10:00Z",
+  "updated_at": "2026-03-01T12:35:00Z"
+}

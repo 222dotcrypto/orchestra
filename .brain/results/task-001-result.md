@@ -1,44 +1,13 @@
-# Результат task-001: CLI ядро утилиты orch
+# Результат task-001: JSONL parser module
 
-## Статус: ГОТОВО
+## Создан файл
+`output/token-calc/src/parser.js`
 
-## Созданные файлы
+## Экспорт
+- `findSessions(projectDir)` — возвращает массив абсолютных путей к .jsonl файлам
+- `parseSession(filePath)` — async, читает JSONL через readline, возвращает объект с полями: filename, model, totalInput, totalOutput, totalCacheCreation, totalCacheRead, firstTimestamp, lastTimestamp
 
-```
-output/orch-cli/
-├── bin/orch.js        — точка входа CLI (executable, shebang)
-├── src/reader.js      — чтение state.json, workers/*.json, tasks/*.json
-├── src/formatter.js   — ANSI-форматирование с цветами
-└── package.json       — name: orch, bin: { orch: bin/orch.js }
-```
-
-## Проверка acceptance criteria
-
-| Критерий | Результат |
-|---|---|
-| `node output/orch-cli/bin/orch.js` выводит статус | ✅ Выводит dashboard: state, workers, tasks с прогресс-баром |
-| `node output/orch-cli/bin/orch.js watch` обновляет экран | ✅ Очищает экран + перерисовка каждые 2 сек |
-| `node output/orch-cli/bin/orch.js log` запускает tail | ✅ Показывает последние 30 строк + spawn tail -f |
-| Нет внешних зависимостей | ✅ Только node:fs, node:path, node:child_process |
-| package.json с bin полем | ✅ `"bin": { "orch": "bin/orch.js" }` |
-
-## Дополнительные команды (бонус)
-
-- `orch tasks` — только задачи
-- `orch workers` — только воркеры
-- `orch help` — справка
-
-## Цвета
-
-- 🟢 Зелёный: done, completed, active, executing
-- 🟡 Жёлтый: in_progress, busy, assigned, review, planning
-- 🔴 Красный: failed, stuck, dead, rework
-- ⚪ Серый: idle, pending
-
-## Установка
-
-```bash
-cd output/orch-cli && npm link
-# или
-node output/orch-cli/bin/orch.js
-```
+## Верификация
+- findSessions: корректно фильтрует .jsonl, возвращает абсолютные пути
+- parseSession: правильно суммирует токены, игнорирует не-assistant строки, пропускает невалидный JSON и строки без usage
+- Только встроенные модули: fs, path, readline

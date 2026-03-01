@@ -32,3 +32,9 @@
 - check-workers.sh (tmux/ps) заменяет heartbeat → убирает ~300 tool calls с воркеров за сессию
 - --dangerously-skip-permissions в run-worker.sh → воркеры могут запускать тесты и любые команды
 - Строгие фазы: не запускать зависимых воркеров до завершения предыдущей фазы → нет idle polling
+
+## Прогон #2: tcalc (5 задач, 2 фазы, 0 rework)
+- Interface-файл между фазами с точными сигнатурами → Phase 2 воркеры сразу видят контракт модулей
+- Пример данных в description (формат JSONL строки) → парсер написан правильно с первого раза
+- Конкретные формулы в description (цены за 1M) → pricing без rework
+- Пример ожидаемого output в description (ASCII-таблица) → formatter без rework
