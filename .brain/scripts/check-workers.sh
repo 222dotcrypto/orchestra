@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-workers.sh — Проверка здоровья воркеров через tmux/ps (замена heartbeat)
+# check-workers.sh — Проверка здоровья воркеров через tmux/ps
 # Использование: bash .brain/scripts/check-workers.sh
 # Возвращает JSON с состоянием каждого воркера.
 
@@ -31,12 +31,14 @@ for wf in "${BRAIN_DIR}"/workers/worker-*.json; do
         PROCESS_ALIVE="false"
     fi
 
-    # Проверяем сигнальные файлы
+    # Проверяем сигнальные файлы (.done или .failed)
     CURRENT_TASK=$(jq -r '.current_task // ""' "$wf" 2>/dev/null)
-    HAS_SIGNAL="false"
+    SIGNAL_TYPE="none"
     if [[ -n "$CURRENT_TASK" ]]; then
-        if [[ -f "${BRAIN_DIR}/signals/${CURRENT_TASK}.review" ]]; then
-            HAS_SIGNAL="true"
+        if [[ -f "${BRAIN_DIR}/signals/${CURRENT_TASK}.done" ]]; then
+            SIGNAL_TYPE="done"
+        elif [[ -f "${BRAIN_DIR}/signals/${CURRENT_TASK}.failed" ]]; then
+            SIGNAL_TYPE="failed"
         fi
     fi
 
@@ -46,7 +48,7 @@ for wf in "${BRAIN_DIR}"/workers/worker-*.json; do
         echo ","
     fi
 
-    echo "  \"${WID}\": {\"window\": ${WINDOW_ALIVE}, \"process\": ${PROCESS_ALIVE}, \"signal\": ${HAS_SIGNAL}}"
+    echo "  \"${WID}\": {\"window\": ${WINDOW_ALIVE}, \"process\": ${PROCESS_ALIVE}, \"signal_type\": \"${SIGNAL_TYPE}\"}"
 done
 
 echo ""

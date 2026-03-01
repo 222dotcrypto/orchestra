@@ -1,31 +1,26 @@
 # Orchestra
 
-AI orchestrator built on [Claude Code](https://docs.anthropic.com/en/docs/claude-code) + tmux. One Claude Code process (the Brain) manages a team of workers (other Claude Code processes) through tmux windows.
+AI orchestrator built on [Claude Code](https://docs.anthropic.com/en/docs/claude-code) + tmux. A Planner (Claude Code) creates a plan, then a Shell Runner executes it — spawning workers, waiting for signals, running checkpoints, and reviewing results. Claude is only called when thinking is needed; everything else is free bash.
 
-## How it works
+## Architecture (v3)
 
 ```
-You ──→ Brain (Claude Code) ──→ tmux session
-                                  ├── worker-01 (coder)
-                                  ├── worker-02 (tester)
-                                  └── worker-03 (writer)
+You → Planner (Claude Code, one-shot)
+         ↓ plan.yaml
+       runner.sh (bash, $0)
+         ├── spawn workers → tmux
+         ├── wait for signals (.done/.failed)
+         ├── check acceptance_signals
+         ├── Checkpoint (Claude, quick) — between phases
+         └── Reviewer (Claude, one-shot) — at the end
 ```
 
-1. You give the Brain a task
-2. Brain classifies it (trivial → does it itself, complex → spawns workers)
-3. Workers execute in parallel tmux windows with strict file ownership
-4. Brain reviews results, requests rework if needed
-5. Output collected in `output/`
-
-## Key features
-
-- **Phased execution** — dependent tasks run sequentially, independent ones in parallel
-- **5C prompts** — Context, Command, Constraints, Criteria, Completion for every worker task
-- **Signal files** — lightweight monitoring via `ls .brain/signals/` instead of JSON polling
-- **Adaptive polling** — 3 min initial wait, then 60s checks (workers usually finish during the pause)
-- **Cold restart** — `state.json` tracks `next_action`, interrupted tasks resume automatically
-- **Code review** — built-in `/review` command spawns a parallel reviewer
-- **Memory system** — patterns and anti-patterns accumulate across sessions
+| Component | What it does | Cost |
+|-----------|-------------|------|
+| **Planner** | Classifies task, generates plan.yaml | $3-5 (one-shot) |
+| **Runner** | Executes plan: spawn, wait, check | $0 (bash) |
+| **Checkpoint** | Decides between phases: CONTINUE/ADJUST/ABORT | $1-2 (quick) |
+| **Reviewer** | Final review of results | $5-7 (one-shot) |
 
 ## Requirements
 
@@ -40,6 +35,9 @@ apt install tmux     # Linux
 # jq
 brew install jq      # macOS
 apt install jq       # Linux
+
+# Python 3 + PyYAML (for plan parsing)
+pip install pyyaml
 ```
 
 ## Quick start
@@ -50,7 +48,7 @@ cd orchestra
 claude
 ```
 
-Claude Code picks up `CLAUDE.md` automatically — it becomes the Brain's system prompt.
+Claude Code picks up `CLAUDE.md` automatically — it becomes the Planner.
 
 Give it a task:
 
@@ -58,7 +56,30 @@ Give it a task:
 Create a REST API with FastAPI, endpoints /users and /posts, pytest tests, and a Dockerfile.
 ```
 
-The Brain will plan, spawn workers, review results, and collect output.
+The Planner will:
+1. Classify complexity (1-10)
+2. If 1-3: do it directly (DIY)
+3. If 4-10: generate `plan.yaml` and run `bash runner.sh plan.yaml`
+
+## Runner
+
+The Shell Runner executes `plan.yaml` autonomously:
+
+```bash
+# Normal execution
+bash runner.sh .brain/plan.yaml
+
+# Dry run (no real Claude calls, logs what would happen)
+bash runner.sh --dry-run .brain/plan.yaml
+```
+
+### Complexity scale
+
+| Complexity | Strategy |
+|-----------|----------|
+| 1-3 | Planner does it itself (DIY) |
+| 4-6 | 2-3 workers, 2 phases |
+| 7-10 | 4-8 workers, 3+ phases, checkpoints |
 
 ## Monitoring
 
@@ -72,7 +93,7 @@ bash .brain/scripts/monitor.sh
 bash .brain/scripts/monitor.sh --watch
 ```
 
-Or attach to the tmux session directly:
+Or attach to the tmux session:
 
 ```bash
 tmux attach -t orchestra
@@ -88,7 +109,7 @@ npm install
 npm start
 ```
 
-Floating desktop widget showing active workers, tasks, and token usage in real-time.
+Floating desktop widget showing active workers, tasks, signals, and token usage in real-time.
 
 ## Commands
 
@@ -102,23 +123,29 @@ Floating desktop widget showing active workers, tasks, and token usage in real-t
 
 ```
 orchestra/
-├── CLAUDE.md                     # Brain system prompt (the orchestrator)
+├── CLAUDE.md                     # Planner system prompt
+├── runner.sh                     # Shell Runner (core of v3)
 ├── .brain/
 │   ├── WORKER_PROTOCOL.md        # Worker protocol (read by workers at start)
-│   ├── state.json                # Orchestrator state (cold restart support)
-│   ├── scripts/                  # Management scripts
+│   ├── state.json                # Orchestrator state
+│   ├── scripts/
 │   │   ├── spawn-worker.sh       # Launch worker in tmux
 │   │   ├── run-worker.sh         # Worker runner (called from tmux)
 │   │   ├── kill-worker.sh        # Stop workers
 │   │   ├── check-workers.sh      # Health check (tmux/ps)
-│   │   └── monitor.sh            # System status display
+│   │   ├── monitor.sh            # System status display
+│   │   ├── yaml_to_json.py       # YAML→JSON converter for runner
+│   │   ├── test-runner.sh        # Runner test harness
+│   │   └── mock-worker.sh        # Mock worker for testing
+│   ├── prompts/
+│   │   └── templates/
+│   │       ├── checkpoint.md     # Checkpoint prompt (between phases)
+│   │       └── reviewer.md       # Reviewer prompt (final review)
 │   ├── tasks/                    # Task JSON files (created per run)
 │   ├── workers/                  # Worker state (created per run)
 │   ├── results/                  # Task results (created per run)
-│   ├── prompts/                  # Generated worker prompts
-│   │   └── templates/            # Reusable prompt templates
-│   ├── logs/                     # Brain and worker logs
-│   ├── signals/                  # Completion markers
+│   ├── logs/                     # Runner and worker logs
+│   ├── signals/                  # Completion markers (.done/.failed)
 │   └── inbox/                    # Materials for content pipeline
 ├── memory/                       # Long-term memory (persists across sessions)
 │   ├── patterns.md               # What works
@@ -128,36 +155,31 @@ orchestra/
 ├── widget/                       # Electron monitoring dashboard
 ├── skills/                       # Skills
 │   └── orchestra/                # /orchestra skill
-├── output/                       # Run results (gitignored)
 └── .claude/
     └── commands/                 # Slash commands (/review, /review-check)
 ```
 
 ## How workers communicate
 
-Workers and the Brain communicate through files:
+Workers and the Runner communicate through files:
 
-- **Tasks**: `.brain/tasks/task-{id}.json` — Brain creates, workers read and update status
-- **Signals**: `.brain/signals/task-{id}.review` — workers create when done, Brain checks via `ls`
-- **Results**: `.brain/results/task-{id}-result.md` — workers write, Brain reviews
+- **Tasks**: `.brain/tasks/task-{id}.json` — Runner creates, workers read and update status
+- **Signals**: `.brain/signals/task-{id}.done` / `.failed` — workers create when finished
+- **Results**: `.brain/results/task-{id}-result.md` — workers write output
 - **Logs**: `.brain/logs/` — everyone writes
 
-## Task classification
+## Testing
 
-| Class | Criteria | Strategy |
-|-------|----------|----------|
-| Trivial | 1 file, <20 lines | Brain does it itself |
-| Simple | 1-2 files, single skill | 1 worker |
-| Moderate | 3-5 files, 2+ skills | 2-3 workers, 1-2 phases |
-| Complex | Many files, many skills | 4-8 workers, 3+ phases |
+```bash
+# Run the test harness (uses --dry-run internally)
+bash .brain/scripts/test-runner.sh
 
-## Content pipeline
+# Test YAML parsing
+python3 .brain/scripts/yaml_to_json.py < .brain/plan.yaml | jq .
 
-For analyzing materials (exported chats, notes, logs):
-
-1. Place files in `.brain/inbox/`
-2. Tell the Brain: "Analyze materials from inbox and create [posts / guide / thread]"
-3. Results appear in `.brain/results/content/`
+# Test runner in dry-run mode
+bash runner.sh --dry-run .brain/plan.yaml
+```
 
 ## Troubleshooting
 
@@ -166,7 +188,8 @@ For analyzing materials (exported chats, notes, logs):
 | Worker won't start | Check that prompt exists in `.brain/prompts/` |
 | tmux session not found | Scripts create it automatically on first spawn |
 | Worker stuck | `bash .brain/scripts/kill-worker.sh worker-XX` and restart |
-| Brain doesn't see results | Check worker wrote to the correct `result_path` |
+| Runner can't parse YAML | Install PyYAML: `pip install pyyaml` |
+| Checkpoint returns ABORT | Check runner.log for reason, fix plan and retry |
 
 ## License
 
