@@ -1,0 +1,27 @@
+{
+  "id": "task-001",
+  "phase": 1,
+  "title": "CLI ядро утилиты orch",
+  "description": "Создай Node.js CLI-утилиту в output/orch-cli/. Без внешних зависимостей (только встроенные модули Node.js).\n\nСтруктура:\n- bin/orch.js — точка входа, парсинг команд\n- src/reader.js — чтение .brain/state.json, workers/*.json, tasks/*.json\n- src/formatter.js — форматирование с ANSI-цветами\n- package.json — name: orch, bin: { orch: bin/orch.js }\n\nКоманды:\n1. orch — статус, workers, tasks\n2. orch watch — live обновление каждые 2 сек\n3. orch log — tail -f .brain/logs/brain.log\n\nЦвета: зелёный=active/done, жёлтый=in_progress, красный=failed/stuck, серый=idle.",
+  "role_required": "coder",
+  "assigned_to": "worker-01",
+  "status": "done",
+  "priority": "high",
+  "depends_on": [],
+  "acceptance_criteria": [
+    "node output/orch-cli/bin/orch.js выводит статус",
+    "node output/orch-cli/bin/orch.js watch обновляет экран",
+    "node output/orch-cli/bin/orch.js log запускает tail",
+    "Нет внешних зависимостей",
+    "package.json с bin полем"
+  ],
+  "context_files": [
+    ".brain/state.json",
+    ".brain/workers/",
+    ".brain/tasks/"
+  ],
+  "result_path": ".brain/results/task-001-result.md",
+  "rework_comment": "",
+  "created_at": "2026-02-28T16:14:07Z",
+  "updated_at": "2026-02-28T16:27:28Z"
+}

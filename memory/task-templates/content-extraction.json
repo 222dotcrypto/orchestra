@@ -1,0 +1,27 @@
+{
+  "_template": "Content Extraction",
+  "_description": "Шаблон задачи на извлечение контента из сырых материалов",
+  "_usage": "Этап 1 контент-пайплайна. Скопируй, замени {placeholders}",
+
+  "id": "task-{id}",
+  "phase": 1,
+  "title": "Извлечение контента из {source_description}",
+  "description": "КОНТЕКСТ: В inbox находятся {описание материалов: chat export, заметки, логи сессий}. Формат: {json/markdown/txt}.\n\nЗАДАЧА: Извлеки из материалов:\n1. Ключевые идеи (пронумеруй, 1-2 предложения каждая)\n2. Сильные цитаты (дословно, с указанием контекста)\n3. Потенциальные темы для контента с предложенным форматом (пост/тред/гайд/tips)\n\nОГРАНИЧЕНИЯ:\n- НЕ интерпретируй и НЕ добавляй своё мнение — только извлечение\n- НЕ генерируй готовый контент — только сырьё\n- Максимум 2 страницы результата",
+  "role_required": "content_analyst",
+  "assigned_to": "worker-{N}",
+  "status": "pending",
+  "priority": "high",
+  "depends_on": [],
+  "owned_files": [],
+  "acceptance_criteria": [
+    "Идеи пронумерованы, каждая в 1-2 предложения",
+    "Цитаты дословные (можно проверить по source)",
+    "Для каждой темы предложен конкретный формат контента"
+  ],
+  "context_files": ["{paths/to/inbox/files}"],
+  "result_path": ".brain/results/content/extracted.md",
+  "rework_count": 0,
+  "rework_comment": "",
+  "created_at": "",
+  "updated_at": ""
+}

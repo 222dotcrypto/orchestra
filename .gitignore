@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Logs
+.brain/logs/*.log
+
+# Worker state (regenerated at runtime)
+.brain/workers/*.json
+
+# Signals (ephemeral)
+.brain/signals/
+
+# Temp files
+*.tmp
+.DS_Store
+
+# Review results (local only, regenerated)
+# Keep requests and results tracked
+
+# Secrets
+.env
+.env.*

@@ -1,0 +1,27 @@
+{
+  "_template": "Test Suite",
+  "_description": "Шаблон задачи на написание тестов",
+  "_usage": "Скопируй, замени {placeholders}",
+
+  "id": "task-{id}",
+  "phase": 1,
+  "title": "Тесты для {module/feature}",
+  "description": "КОНТЕКСТ: {что тестируем, какой фреймворк (jest/pytest/etc), где существующие тесты}\n\nЗАДАЧА: Напиши тесты для {module/feature}. Покрой: happy path, edge cases ({перечислить}), error cases ({перечислить}).\n\nОГРАНИЧЕНИЯ:\n- НЕ трогай файлы вне owned_files\n- НЕ меняй продакшн-код\n- Используй фреймворк {jest/pytest/etc}\n- Моки только для {external dependencies}",
+  "role_required": "tester",
+  "assigned_to": "worker-{N}",
+  "status": "pending",
+  "priority": "high",
+  "depends_on": [],
+  "owned_files": ["{path/to/test/file}"],
+  "acceptance_criteria": [
+    "Все тесты проходят (приложен полный stdout)",
+    "Покрыты edge cases: {список}",
+    "Минимум {N} тест-кейсов"
+  ],
+  "context_files": ["{path/to/module/being/tested}"],
+  "result_path": ".brain/results/task-{id}-result.md",
+  "rework_count": 0,
+  "rework_comment": "",
+  "created_at": "",
+  "updated_at": ""
+}

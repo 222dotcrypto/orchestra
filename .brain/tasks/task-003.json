@@ -1,0 +1,26 @@
+{
+  "id": "task-003",
+  "phase": 1,
+  "title": "README для CLI orch",
+  "description": "README.md в output/orch-cli/. Описание, установка (npm link), команды с примерами вывода, структура проекта. Русский язык. Прочитай исходники перед написанием.",
+  "role_required": "writer",
+  "assigned_to": "worker-03",
+  "status": "done",
+  "priority": "medium",
+  "depends_on": [
+    "task-001"
+  ],
+  "acceptance_criteria": [
+    "output/orch-cli/README.md существует",
+    "Описаны все 3 команды с примерами",
+    "Инструкция по установке",
+    "Русский, лаконичный"
+  ],
+  "context_files": [
+    "output/orch-cli/"
+  ],
+  "result_path": ".brain/results/task-003-result.md",
+  "rework_comment": "",
+  "created_at": "2026-02-28T16:14:07Z",
+  "updated_at": "2026-02-28T16:26:05Z"
+}

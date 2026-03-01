@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="widget" class="widget">
+    <canvas id="matrix-rain" class="matrix-rain"></canvas>
+
+    <!-- Main View -->
+    <div id="main-view">
+      <!-- Header -->
+      <div class="top-row">
+        <span class="logo">ORCHESTRA</span>
+        <span id="status-badge" class="status-badge status-idle">idle</span>
+        <span id="indicator" class="indicator"></span>
+      </div>
+
+      <!-- Metrics (только воркеры и задачи) -->
+      <div class="metrics-row">
+        <div class="metric">
+          <span id="m-workers" class="metric-val green">0</span>
+          <span class="metric-lbl">сессии</span>
+        </div>
+        <div class="metric">
+          <span id="m-tasks" class="metric-val blue">0/0</span>
+          <span class="metric-lbl">задачи</span>
+        </div>
+      </div>
+
+      <!-- Progress (прячется когда idle) -->
+      <div id="progress-section" class="progress-section hidden">
+        <div class="progress-row">
+          <span class="progress-lbl">задачи</span>
+          <div class="bar-track"><div id="tasks-bar" class="bar-fill amber"></div></div>
+          <span id="tasks-pct" class="progress-val">—</span>
+        </div>
+      </div>
+
+      <!-- Workers list -->
+      <div id="workers-section" class="workers-section hidden">
+        <div class="section-hdr">сессии</div>
+        <div id="workers-list" class="workers-list"></div>
+      </div>
+
+      <!-- Token footer -->
+      <div class="token-footer">
+        <span class="tf-group"><span class="tf-up">↑</span> <span id="t-in">—</span></span>
+        <span class="tf-sep">·</span>
+        <span class="tf-group"><span class="tf-down">↓</span> <span id="t-out">—</span></span>
+        <span class="tf-sep">·</span>
+        <span class="tf-group"><span class="tf-cost">$</span><span id="t-cost">—</span></span>
+      </div>
+    </div>
+
+    <!-- Compact View -->
+    <div id="compact-view" class="compact-view hidden">
+      <span class="logo-sm">ORCH</span>
+      <span id="status-compact" class="status-badge status-idle">idle</span>
+      <span id="workers-compact" class="compact-stat green">0</span>
+      <span class="compact-lbl">W</span>
+      <span id="tasks-compact" class="compact-stat blue">0/0</span>
+      <span class="compact-lbl">T</span>
+      <span id="indicator-compact" class="indicator"></span>
+    </div>
+
+    <!-- Error View -->
+    <div id="error-view" class="error-view hidden">
+      <span>Нет данных</span>
+    </div>
+  </div>
+
+  <script src="matrix.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

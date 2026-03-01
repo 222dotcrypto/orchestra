@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(kill 74551)",
+      "Bash(kill 74565)",
+      "Bash(kill 74566)",
+      "Bash(pkill -f \"orchestra-widget.*Electron\")",
+      "Bash(npx ccusage@latest --help)",
+      "Read(//Users/user/.claude/**)",
+      "Bash(npx ccusage@latest session --help)",
+      "Bash(npx ccusage@latest daily --help)",
+      "Bash(# Посмотрим первые строки JSONL файла сессии orchestra чтобы понять формат head -5 ~/.claude/projects/-Users-danilasartakov-orchestra/15473b4f-8ff8-4854-8110-6af90ccf76dc.jsonl | python3 -m json.tool)",
+      "Bash(# Посмотрим первую строку JSONL как текст head -1 ~/.claude/projects/-Users-danilasartakov-orchestra/15473b4f-8ff8-4854-8110-6af90ccf76dc.jsonl)"
+    ]
+  }
+}

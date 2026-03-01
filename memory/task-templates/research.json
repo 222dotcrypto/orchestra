@@ -1,0 +1,27 @@
+{
+  "_template": "Research",
+  "_description": "Шаблон задачи на исследование/ресёрч",
+  "_usage": "Скопируй, замени {placeholders}",
+
+  "id": "task-{id}",
+  "phase": 1,
+  "title": "Исследование: {topic}",
+  "description": "КОНТЕКСТ: {зачем нужно исследование, какой проект, какое решение принимаем}\n\nЗАДАЧА: Исследуй {topic}. Ответь на вопросы:\n1. {конкретный вопрос 1}\n2. {конкретный вопрос 2}\n3. {конкретный вопрос 3}\n\nОГРАНИЧЕНИЯ:\n- Максимум 1 страница результата\n- Указывай источники (URL, документация)\n- Факты отдельно от выводов\n- НЕ пиши код, только рекомендации",
+  "role_required": "researcher",
+  "assigned_to": "worker-{N}",
+  "status": "pending",
+  "priority": "medium",
+  "depends_on": [],
+  "owned_files": [],
+  "acceptance_criteria": [
+    "Все {N} вопросов получили конкретный ответ",
+    "Указаны источники для каждого факта",
+    "Есть секция 'Рекомендации' с конкретными действиями"
+  ],
+  "context_files": [],
+  "result_path": ".brain/results/task-{id}-result.md",
+  "rework_count": 0,
+  "rework_comment": "",
+  "created_at": "",
+  "updated_at": ""
+}

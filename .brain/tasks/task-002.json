@@ -1,0 +1,26 @@
+{
+  "id": "task-002",
+  "phase": 1,
+  "title": "Тесты для CLI orch",
+  "description": "Тесты в output/orch-cli/tests/. Используй node:test и node:assert.\n\nТесты: reader (state/workers/tasks), formatter (вывод), CLI integration (execFile bin/orch.js).\n\nПодожди пока coder создаст исходники. Проверяй наличие файлов, если нет — жди 30 сек.",
+  "role_required": "tester",
+  "assigned_to": "worker-02",
+  "status": "done",
+  "priority": "medium",
+  "depends_on": [
+    "task-001"
+  ],
+  "acceptance_criteria": [
+    "Тесты в output/orch-cli/tests/",
+    "node:test и node:assert без зависимостей",
+    "node --test output/orch-cli/tests/ проходит",
+    "Покрыты reader, formatter, CLI"
+  ],
+  "context_files": [
+    "output/orch-cli/"
+  ],
+  "result_path": ".brain/results/task-002-result.md",
+  "rework_comment": "",
+  "created_at": "2026-02-28T16:14:07Z",
+  "updated_at": "2026-02-28T16:39:39Z"
+}

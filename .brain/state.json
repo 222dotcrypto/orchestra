@@ -1,0 +1,12 @@
+{
+  "status": "done",
+  "current_task": "CLI-утилита orch — мониторинг оркестратора",
+  "phase": 1,
+  "total_phases": 1,
+  "workers_active": 3,
+  "tasks_total": 3,
+  "tasks_done": 3,
+  "tasks_failed": 0,
+  "started_at": "2026-02-28T16:12:03Z",
+  "updated_at": "2026-02-28T16:39:39Z"
+}

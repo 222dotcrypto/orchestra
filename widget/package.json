@@ -1,0 +1,26 @@
+{
+  "name": "orchestra-widget",
+  "version": "1.0.0",
+  "description": "Floating widget for Orchestra — shows active workers, tasks and token usage",
+  "main": "main.js",
+  "scripts": {
+    "start": "unset ELECTRON_RUN_AS_NODE && electron .",
+    "dist": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^34.5.8",
+    "electron-builder": "^25.0.0"
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6",
+    "electron-store": "^8.2.0"
+  },
+  "build": {
+    "appId": "com.orchestra.widget",
+    "productName": "Orchestra Widget",
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["arm64"] }],
+      "category": "public.app-category.utilities"
+    }
+  }
+}
