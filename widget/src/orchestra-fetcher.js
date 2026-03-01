@@ -41,7 +41,15 @@ async function fetchOrchestraData(orchestraPath) {
   });
 
   const workers = readJsonDir(path.join(brainDir, 'workers'), /^worker-/);
-  const tasks = readJsonDir(path.join(brainDir, 'tasks'), /^task-/);
+  const allTasks = readJsonDir(path.join(brainDir, 'tasks'), /^task-/);
+
+  // Фильтруем задачи только текущего прогона (по ID из state.phases)
+  const currentTaskIds = new Set(
+    (state.phases || []).flatMap(p => p.tasks || [])
+  );
+  const tasks = currentTaskIds.size > 0
+    ? allTasks.filter(t => currentTaskIds.has(t.id))
+    : allTasks;
 
   // Токены: только сессии воркеров, созданные после started_at
   const tokens = fetchOrchestraTokens(orchestraPath, state.started_at);

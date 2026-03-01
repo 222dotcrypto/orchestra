@@ -1,17 +1,14 @@
 {
-  "status": "done",
-  "current_task": "Token Cost Calculator (tcalc)",
-  "class": "moderate",
-  "current_phase": 2,
-  "phases": [
-    {"id": 1, "status": "done", "tasks": ["task-001", "task-002", "task-003"]},
-    {"id": 2, "status": "done", "tasks": ["task-004", "task-005"]}
-  ],
+  "status": "idle",
+  "current_task": null,
+  "class": null,
+  "current_phase": 0,
+  "phases": [],
   "workers_active": 0,
-  "tasks_total": 5,
-  "tasks_done": 5,
+  "tasks_total": 0,
+  "tasks_done": 0,
   "tasks_failed": 0,
-  "next_action": "idle",
-  "started_at": "2026-03-01T12:00:00Z",
-  "updated_at": "2026-03-01T12:20:00Z"
+  "next_action": "Waiting for task",
+  "started_at": "",
+  "updated_at": ""
 }

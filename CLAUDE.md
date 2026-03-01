@@ -272,8 +272,7 @@ bash .brain/scripts/check-workers.sh
 4. Обнови `state.json` → `status: "done"`
 5. Запиши метрики в `.brain/metrics.jsonl`
 6. Обнови `memory/patterns.md` или `memory/anti-patterns.md` если есть инсайты
-7. Замерь стоимость прогона: `node output/token-calc/bin/tcalc.js --since "<started_at из state.json>" --breakdown` → покажи человеку
-8. Покажи человеку: "Готово. Результат в output/. Стоимость: $X. [краткое резюме]"
+7. Покажи человеку: "Готово. Результат в output/. [краткое резюме]"
 
 ---
 

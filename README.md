@@ -1,150 +1,173 @@
-# Orchestra — AI-оркестратор на Claude Code + tmux
+# Orchestra
 
-Система где один Claude Code (Мозг) управляет командой воркеров (другие Claude Code процессы) через tmux.
+AI orchestrator built on [Claude Code](https://docs.anthropic.com/en/docs/claude-code) + tmux. One Claude Code process (the Brain) manages a team of workers (other Claude Code processes) through tmux windows.
 
-## Зависимости
+## How it works
+
+```
+You ──→ Brain (Claude Code) ──→ tmux session
+                                  ├── worker-01 (coder)
+                                  ├── worker-02 (tester)
+                                  └── worker-03 (writer)
+```
+
+1. You give the Brain a task
+2. Brain classifies it (trivial → does it itself, complex → spawns workers)
+3. Workers execute in parallel tmux windows with strict file ownership
+4. Brain reviews results, requests rework if needed
+5. Output collected in `output/`
+
+## Key features
+
+- **Phased execution** — dependent tasks run sequentially, independent ones in parallel
+- **5C prompts** — Context, Command, Constraints, Criteria, Completion for every worker task
+- **Signal files** — lightweight monitoring via `ls .brain/signals/` instead of JSON polling
+- **Adaptive polling** — 3 min initial wait, then 60s checks (workers usually finish during the pause)
+- **Cold restart** — `state.json` tracks `next_action`, interrupted tasks resume automatically
+- **Code review** — built-in `/review` command spawns a parallel reviewer
+- **Memory system** — patterns and anti-patterns accumulate across sessions
+
+## Requirements
 
 ```bash
-# Claude Code (должен быть установлен и авторизован)
+# Claude Code CLI (must be installed and authenticated)
 claude --version
 
 # tmux
-brew install tmux  # macOS
-# или: apt install tmux  # Linux
+brew install tmux    # macOS
+apt install tmux     # Linux
 
-# jq (для работы с JSON в скриптах)
-brew install jq    # macOS
-# или: apt install jq    # Linux
+# jq
+brew install jq      # macOS
+apt install jq       # Linux
 ```
 
-## Быстрый старт
-
-### 1. Перейди в директорию
+## Quick start
 
 ```bash
+git clone https://github.com/222dotcrypto/orchestra.git
 cd orchestra
-```
-
-### 2. Запусти Мозг
-
-```bash
 claude
 ```
 
-Claude Code подхватит `CLAUDE.md` автоматически — это system prompt Мозга.
+Claude Code picks up `CLAUDE.md` automatically — it becomes the Brain's system prompt.
 
-### 3. Дай задачу
-
-Просто напиши что нужно сделать:
+Give it a task:
 
 ```
-Создай REST API на FastAPI с эндпоинтами /users и /posts, напиши тесты на pytest, сделай Dockerfile.
+Create a REST API with FastAPI, endpoints /users and /posts, pytest tests, and a Dockerfile.
 ```
 
-Мозг сам:
-- Составит план
-- Определит роли (coder, tester, devops)
-- Запустит воркеров в отдельных tmux окнах
-- Назначит задачи
-- Проверит результаты
-- Соберёт финальный результат в `output/`
+The Brain will plan, spawn workers, review results, and collect output.
 
-### 4. Мониторинг
+## Monitoring
 
-В **другом** терминале:
+In a separate terminal:
 
 ```bash
-# Разовый снимок статуса
-cd orchestra && bash .brain/scripts/monitor.sh
+# One-time status snapshot
+bash .brain/scripts/monitor.sh
 
-# Автообновление каждые 5 сек
-cd orchestra && bash .brain/scripts/monitor.sh --watch
+# Auto-refresh every 5 seconds
+bash .brain/scripts/monitor.sh --watch
 ```
 
-Или через tmux:
+Or attach to the tmux session directly:
+
 ```bash
-# Подключиться к сессии
 tmux attach -t orchestra
-
-# Переключение между окнами: Ctrl+B, затем номер окна
-# Список окон: Ctrl+B, W
+# Switch windows: Ctrl+B then window number
+# List windows: Ctrl+B, W
 ```
 
-## Структура
+## Widget (Electron dashboard)
+
+```bash
+cd widget
+npm install
+npm start
+```
+
+Floating desktop widget showing active workers, tasks, and token usage in real-time.
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/review` | Run parallel code review of changed files |
+| `/review full` | Review entire project |
+| `/review-check` | Check review results and apply fixes |
+
+## Project structure
 
 ```
 orchestra/
-├── CLAUDE.md                  ← System prompt Мозга
-├── README.md                  ← Этот файл
-├── output/                    ← Финальные результаты
-└── .brain/
-    ├── plan.md                ← План текущей задачи
-    ├── state.json             ← Состояние оркестратора
-    ├── tasks/                 ← JSON-файлы задач для воркеров
-    ├── workers/               ← JSON-файлы состояния воркеров
-    ├── results/               ← Результаты выполненных задач
-    │   └── content/           ← Контент от content_analyst
-    ├── prompts/               ← Сгенерированные промпты воркеров
-    ├── logs/                  ← Логи мозга и воркеров
-    ├── scripts/               ← Bash-скрипты управления
-    │   ├── spawn-worker.sh    ← Запуск воркера в tmux
-    │   ├── kill-worker.sh     ← Остановка воркера
-    │   └── monitor.sh         ← Статус системы
-    └── inbox/                 ← Материалы для контент-анализа
+├── CLAUDE.md                     # Brain system prompt (the orchestrator)
+├── .brain/
+│   ├── WORKER_PROTOCOL.md        # Worker protocol (read by workers at start)
+│   ├── state.json                # Orchestrator state (cold restart support)
+│   ├── scripts/                  # Management scripts
+│   │   ├── spawn-worker.sh       # Launch worker in tmux
+│   │   ├── run-worker.sh         # Worker runner (called from tmux)
+│   │   ├── kill-worker.sh        # Stop workers
+│   │   ├── check-workers.sh      # Health check (tmux/ps)
+│   │   └── monitor.sh            # System status display
+│   ├── tasks/                    # Task JSON files (created per run)
+│   ├── workers/                  # Worker state (created per run)
+│   ├── results/                  # Task results (created per run)
+│   ├── prompts/                  # Generated worker prompts
+│   │   └── templates/            # Reusable prompt templates
+│   ├── logs/                     # Brain and worker logs
+│   ├── signals/                  # Completion markers
+│   └── inbox/                    # Materials for content pipeline
+├── memory/                       # Long-term memory (persists across sessions)
+│   ├── patterns.md               # What works
+│   ├── anti-patterns.md          # What doesn't work
+│   ├── worker-profiles.md        # Effective prompts by role
+│   └── task-templates/           # Ready-made task templates
+├── widget/                       # Electron monitoring dashboard
+├── skills/                       # Skills
+│   └── orchestra/                # /orchestra skill
+├── output/                       # Run results (gitignored)
+└── .claude/
+    └── commands/                 # Slash commands (/review, /review-check)
 ```
 
-## Скрипты управления
+## How workers communicate
 
-### Запуск воркера вручную
+Workers and the Brain communicate through files:
 
-```bash
-bash .brain/scripts/spawn-worker.sh worker-01 coder
-```
+- **Tasks**: `.brain/tasks/task-{id}.json` — Brain creates, workers read and update status
+- **Signals**: `.brain/signals/task-{id}.review` — workers create when done, Brain checks via `ls`
+- **Results**: `.brain/results/task-{id}-result.md` — workers write, Brain reviews
+- **Logs**: `.brain/logs/` — everyone writes
 
-### Остановка воркера
+## Task classification
 
-```bash
-bash .brain/scripts/kill-worker.sh worker-01
-bash .brain/scripts/kill-worker.sh --all  # убить всех
-```
+| Class | Criteria | Strategy |
+|-------|----------|----------|
+| Trivial | 1 file, <20 lines | Brain does it itself |
+| Simple | 1-2 files, single skill | 1 worker |
+| Moderate | 3-5 files, 2+ skills | 2-3 workers, 1-2 phases |
+| Complex | Many files, many skills | 4-8 workers, 3+ phases |
 
-### Монитор
+## Content pipeline
 
-```bash
-bash .brain/scripts/monitor.sh          # разовый снимок
-bash .brain/scripts/monitor.sh --watch  # автообновление
-```
+For analyzing materials (exported chats, notes, logs):
 
-## Контент-пайплайн
+1. Place files in `.brain/inbox/`
+2. Tell the Brain: "Analyze materials from inbox and create [posts / guide / thread]"
+3. Results appear in `.brain/results/content/`
 
-Для анализа материалов (экспортированные чаты, логи, заметки):
+## Troubleshooting
 
-1. Положи файлы в `.brain/inbox/`
-2. Скажи Мозгу: "Проанализируй материалы из inbox и создай [посты / гайд / тред]"
-3. Результаты появятся в `.brain/results/content/`
+| Problem | Solution |
+|---------|----------|
+| Worker won't start | Check that prompt exists in `.brain/prompts/` |
+| tmux session not found | Scripts create it automatically on first spawn |
+| Worker stuck | `bash .brain/scripts/kill-worker.sh worker-XX` and restart |
+| Brain doesn't see results | Check worker wrote to the correct `result_path` |
 
-## Протокол общения
+## License
 
-Мозг и воркеры общаются через файлы:
-- **Задачи**: `.brain/tasks/task-{id}.json` — Мозг создаёт, воркеры читают и обновляют статус
-- **Статус воркеров**: `.brain/workers/worker-{id}.json` — воркеры обновляют heartbeat
-- **Результаты**: `.brain/results/` — воркеры пишут, Мозг проверяет
-- **Логи**: `.brain/logs/` — все пишут
-
-## Очистка
-
-После завершения задачи можно очистить рабочие файлы:
-
-```bash
-rm -rf .brain/tasks/*.json .brain/workers/*.json .brain/results/*.md .brain/prompts/*.md .brain/logs/*.log
-```
-
-## Решение проблем
-
-**Воркер не запускается**: проверь что промпт существует в `.brain/prompts/`
-
-**tmux сессия не найдена**: скрипт создаст её автоматически при первом spawn
-
-**Воркер завис**: `bash .brain/scripts/kill-worker.sh worker-XX` и перезапусти
-
-**Мозг не видит результатов**: проверь что воркер записал результат в правильный `result_path`
+MIT

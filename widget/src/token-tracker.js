@@ -48,7 +48,7 @@ function parseSessionFile(filePath, sinceTs) {
 
   const lines = content.split('\n');
   for (const line of lines) {
-    if (!line.includes('"type":"assistant"')) continue;
+    if (!line.includes('"role":"assistant"')) continue;
 
     let record;
     try {
@@ -119,14 +119,8 @@ function fetchOrchestraTokens(orchestraPath, startedAt) {
   for (const file of files) {
     const filePath = path.join(projectDir, file);
 
-    // Берём только файлы, СОЗДАННЫЕ после started_at (сессии воркеров)
-    try {
-      const stat = fs.statSync(filePath);
-      const createdAt = stat.birthtimeMs || stat.ctimeMs;
-      if (createdAt < sinceTs) continue;
-    } catch {
-      continue;
-    }
+    // Фильтрация по записям внутри файла (sinceTs в parseSessionFile)
+    // Файловый фильтр по birthtimeMs убран — ненадёжен при неточном started_at
 
     const session = parseSessionFile(filePath, sinceTs);
     totals.input += session.input;
