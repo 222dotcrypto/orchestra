@@ -17,16 +17,27 @@
         <span id="indicator" class="indicator"></span>
       </div>
 
-      <!-- Metrics (только воркеры и задачи) -->
+      <!-- Metrics -->
       <div class="metrics-row">
         <div class="metric">
           <span id="m-workers" class="metric-val green">0</span>
           <span class="metric-lbl">сессии</span>
         </div>
         <div class="metric">
+          <span id="m-phase" class="metric-val cyan">—</span>
+          <span class="metric-lbl">фаза</span>
+        </div>
+        <div class="metric">
           <span id="m-tasks" class="metric-val blue">0/0</span>
           <span class="metric-lbl">задачи</span>
         </div>
+      </div>
+
+      <!-- Info row (signals, reworks, suspicious) -->
+      <div id="info-row" class="info-row hidden">
+        <span id="info-signals" class="info-item"></span>
+        <span id="info-reworks" class="info-item"></span>
+        <span id="info-suspicious" class="info-item"></span>
       </div>
 
       <!-- Progress (прячется когда idle) -->
@@ -58,6 +69,8 @@
     <div id="compact-view" class="compact-view hidden">
       <span class="logo-sm">ORCH</span>
       <span id="status-compact" class="status-badge status-idle">idle</span>
+      <span id="phase-compact" class="compact-stat cyan">—</span>
+      <span class="compact-lbl">P</span>
       <span id="workers-compact" class="compact-stat green">0</span>
       <span class="compact-lbl">W</span>
       <span id="tasks-compact" class="compact-stat blue">0/0</span>

@@ -141,6 +141,23 @@ html, body {
 .red { color: var(--red); }
 .cyan { color: var(--cyan); }
 
+/* ── Info row ── */
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 2px 12px 6px;
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+.info-item:empty { display: none; }
+
+.info-item {
+  letter-spacing: 0.5px;
+}
+
 /* ── Progress bars ── */
 .progress-section {
   padding: 4px 12px 8px;

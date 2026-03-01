@@ -25,14 +25,22 @@ function readJson(filePath, fallback) {
   }
 }
 
+function countFiles(dirPath, ext) {
+  try {
+    return fs.readdirSync(dirPath).filter(f => f.endsWith(ext)).length;
+  } catch {
+    return 0;
+  }
+}
+
 async function fetchOrchestraData(orchestraPath) {
   const brainDir = path.join(orchestraPath, '.brain');
 
   const state = readJson(path.join(brainDir, 'state.json'), {
     status: 'idle',
     current_task: null,
-    phase: 0,
-    total_phases: 0,
+    current_phase: 0,
+    phases: [],
     workers_active: 0,
     tasks_total: 0,
     tasks_done: 0,
@@ -55,11 +63,25 @@ async function fetchOrchestraData(orchestraPath) {
   const tokens = fetchOrchestraTokens(orchestraPath, state.started_at);
 
   const activeWorkers = workers.filter(w => w.status === 'busy' || w.status === 'idle');
-  const stuckWorkers = workers.filter(w => {
-    if (w.status !== 'busy' || !w.last_heartbeat) return false;
-    const diff = Date.now() - new Date(w.last_heartbeat).getTime();
-    return diff > 120000;
-  });
+
+  // Signals
+  const signalsDir = path.join(brainDir, 'signals');
+  const signalsDone = countFiles(signalsDir, '.done');
+  const signalsFailed = countFiles(signalsDir, '.failed');
+  const signalsSuspicious = countFiles(signalsDir, '.suspicious');
+
+  // Checkpoints
+  const checkpointsDir = path.join(brainDir, 'checkpoints');
+  const checkpoints = readJsonDir(checkpointsDir, /checkpoint/);
+
+  // Reworks
+  const reworkCount = tasks.reduce((sum, t) => sum + (t.rework_count || 0), 0);
+
+  // Phase info
+  const phases = state.phases || [];
+  const totalPhases = phases.length;
+  const currentPhase = state.current_phase || 0;
+  const phasesDone = phases.filter(p => p.status === 'done').length;
 
   return {
     state,
@@ -68,12 +90,18 @@ async function fetchOrchestraData(orchestraPath) {
     tokens,
     computed: {
       activeCount: activeWorkers.length,
-      stuckCount: stuckWorkers.length,
       tasksDone: tasks.filter(t => t.status === 'done').length,
       tasksTotal: tasks.length,
       tasksInProgress: tasks.filter(t => t.status === 'in_progress').length,
-      tasksReview: tasks.filter(t => t.status === 'review').length,
-      tasksFailed: tasks.filter(t => t.status === 'failed').length
+      tasksFailed: tasks.filter(t => t.status === 'failed').length,
+      reworkCount,
+      signalsDone,
+      signalsFailed,
+      signalsSuspicious,
+      currentPhase,
+      totalPhases,
+      phasesDone,
+      checkpoints: checkpoints.length
     }
   };
 }

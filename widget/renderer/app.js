@@ -8,7 +8,12 @@ const el = {
   statusBadge: $('status-badge'),
   indicator: $('indicator'),
   mWorkers: $('m-workers'),
+  mPhase: $('m-phase'),
   mTasks: $('m-tasks'),
+  infoRow: $('info-row'),
+  infoSignals: $('info-signals'),
+  infoReworks: $('info-reworks'),
+  infoSuspicious: $('info-suspicious'),
   progressSection: $('progress-section'),
   tasksBar: $('tasks-bar'),
   tasksPct: $('tasks-pct'),
@@ -18,6 +23,7 @@ const el = {
   tOut: $('t-out'),
   tCost: $('t-cost'),
   statusCompact: $('status-compact'),
+  phaseCompact: $('phase-compact'),
   workersCompact: $('workers-compact'),
   tasksCompact: $('tasks-compact'),
   indicatorCompact: $('indicator-compact')
@@ -89,11 +95,14 @@ window.api.onOrchestraData((data) => {
     el.indicator.classList.remove('pulse');
     el.indicatorCompact.classList.remove('pulse');
     el.mWorkers.textContent = '0';
+    el.mPhase.textContent = '—';
     el.mTasks.textContent = '0/0';
+    el.phaseCompact.textContent = '—';
     el.workersCompact.textContent = '0';
     el.tasksCompact.textContent = '0/0';
     el.progressSection.classList.add('hidden');
     el.workersSection.classList.add('hidden');
+    el.infoRow.classList.add('hidden');
     // Токены последнего прогона — показываем если есть
     if (tokens) {
       el.tIn.textContent = fmtTokens(tokens.inputTokens + tokens.cacheReadTokens);
@@ -118,11 +127,27 @@ window.api.onOrchestraData((data) => {
 
   // Метрики
   el.mWorkers.textContent = computed.activeCount;
+  el.mPhase.textContent = computed.totalPhases > 0
+    ? computed.currentPhase + '/' + computed.totalPhases
+    : '—';
   el.mTasks.textContent = computed.tasksDone + '/' + computed.tasksTotal;
 
   // Compact
+  el.phaseCompact.textContent = computed.totalPhases > 0
+    ? computed.currentPhase + '/' + computed.totalPhases
+    : '—';
   el.workersCompact.textContent = computed.activeCount;
   el.tasksCompact.textContent = computed.tasksDone + '/' + computed.tasksTotal;
+
+  // Info row (signals, reworks, suspicious)
+  const hasInfo = computed.signalsDone > 0 || computed.signalsFailed > 0
+    || computed.signalsSuspicious > 0 || computed.reworkCount > 0;
+  el.infoRow.classList.toggle('hidden', !hasInfo);
+  el.infoSignals.textContent = (computed.signalsDone || 0) + '✓ ' + (computed.signalsFailed || 0) + '✗';
+  el.infoReworks.textContent = computed.reworkCount > 0 ? computed.reworkCount + ' rework' : '';
+  el.infoSuspicious.textContent = computed.signalsSuspicious > 0
+    ? computed.signalsSuspicious + ' suspicious'
+    : '';
 
   // Прогресс
   if (computed.tasksTotal > 0) {
