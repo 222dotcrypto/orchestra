@@ -107,6 +107,42 @@ phases:
 Runner проверяет автоматически после `.done` сигнала:
 - `file_exists` — файл существует
 - `file_contains` — файл содержит pattern (grep)
+- `file_min_lines` — файл имеет минимум N строк (ловит заглушки)
+- `file_max_lines` — файл не превышает N строк (ловит мусор/copy-paste)
+- `no_pattern` — файл НЕ содержит pattern (запрещённые `TODO`, `pass`, `FIXME`)
+- `command_succeeds` — команда завершается с exit code 0
+- `command_output_contains` — вывод команды содержит ожидаемую строку
+- `no_syntax_errors` — проверка синтаксиса (python3/node/bash по расширению)
+
+**Примеры:**
+```yaml
+acceptance_signals:
+  - type: file_exists
+    path: src/app.py
+  - type: file_min_lines
+    path: src/app.py
+    min_lines: 10
+  - type: no_pattern
+    path: src/app.py
+    pattern: "pass$"
+  - type: no_syntax_errors
+    path: src/app.py
+  - type: command_succeeds
+    command: "pytest tests/ -x"
+  - type: command_output_contains
+    command: "pytest tests/ -v"
+    expected: "passed"
+```
+
+**Правила генерации acceptance_signals:**
+- Минимум 3 сигнала на задачу
+- Код → всегда: `file_exists` + `no_syntax_errors` + `file_min_lines` + `no_pattern` (pass/TODO)
+- Тесты → всегда: `command_succeeds` + `command_output_contains` ("passed")
+- Команды — только из whitelist: pytest, python3, node, bash, npm, npx, go, cargo, make
+
+### Дополнительные поля задач
+- `critical: true` — задача критична, runner запускает task-level checkpoint после .done
+- `checkpoint_after: true` — runner запускает checkpoint после этой задачи (даже если не critical)
 
 ### on_failure
 - `retry` — перезапустить воркера (до 2 попыток)

@@ -89,11 +89,15 @@ show_status() {
     done_count=$(find "${BRAIN_DIR}/signals" -name "*.done" 2>/dev/null | wc -l | tr -d ' ')
     failed_count=$(find "${BRAIN_DIR}/signals" -name "*.failed" 2>/dev/null | wc -l | tr -d ' ')
 
-    if [[ $done_count -gt 0 ]] || [[ $failed_count -gt 0 ]]; then
+    local suspicious_count=0
+    suspicious_count=$(find "${BRAIN_DIR}/signals" -name "*.suspicious" 2>/dev/null | wc -l | tr -d ' ')
+
+    if [[ $done_count -gt 0 ]] || [[ $failed_count -gt 0 ]] || [[ $suspicious_count -gt 0 ]]; then
         [[ $done_count -gt 0 ]] && echo -e "  ${GREEN}${done_count} .done${NC}"
         [[ $failed_count -gt 0 ]] && echo -e "  ${RED}${failed_count} .failed${NC}"
+        [[ $suspicious_count -gt 0 ]] && echo -e "  ${YELLOW}${suspicious_count} .suspicious${NC}"
         # Список сигналов
-        for sig in "${BRAIN_DIR}"/signals/*.done "${BRAIN_DIR}"/signals/*.failed; do
+        for sig in "${BRAIN_DIR}"/signals/*.done "${BRAIN_DIR}"/signals/*.failed "${BRAIN_DIR}"/signals/*.suspicious; do
             [[ -f "$sig" ]] || continue
             local name ext
             name=$(basename "$sig")
@@ -101,6 +105,7 @@ show_status() {
             name="${name%.*}"
             local color="${GREEN}"
             [[ "$ext" == "failed" ]] && color="${RED}"
+            [[ "$ext" == "suspicious" ]] && color="${YELLOW}"
             echo -e "    ${color}${name}.${ext}${NC}"
         done
     else
@@ -168,6 +173,49 @@ show_status() {
     done
     if [[ $task_count -eq 0 ]]; then
         echo -e "  ${YELLOW}Нет задач${NC}"
+    fi
+    echo ""
+
+    # Checkpoints
+    echo -e "${BOLD}Checkpoints${NC}"
+    echo -e "───────────────────────────────────────────"
+    local cp_count=0
+    if [[ -d "${BRAIN_DIR}/checkpoints" ]]; then
+        for cpf in "${BRAIN_DIR}"/checkpoints/*-checkpoint.json; do
+            [[ -f "$cpf" ]] || continue
+            cp_count=$((cp_count + 1))
+            local cpname
+            cpname=$(basename "$cpf" -checkpoint.json)
+            local cpverdict
+            cpverdict=$(jq -r '.verdict // "?"' "$cpf" 2>/dev/null || echo "?")
+            local cpcolor="${GREEN}"
+            [[ "$cpverdict" == "REWORK" ]] && cpcolor="${YELLOW}"
+            [[ "$cpverdict" == "ABORT" ]] && cpcolor="${RED}"
+            echo -e "  ${cpname}: ${cpcolor}${cpverdict}${NC}"
+        done
+    fi
+    if [[ $cp_count -eq 0 ]]; then
+        echo -e "  ${YELLOW}Нет checkpoints${NC}"
+    fi
+    echo ""
+
+    # Reworks
+    echo -e "${BOLD}Reworks${NC}"
+    echo -e "───────────────────────────────────────────"
+    local rework_found=false
+    for tf in "${BRAIN_DIR}"/tasks/task-*.json; do
+        [[ -f "$tf" ]] || continue
+        local rcount
+        rcount=$(jq -r '.rework_count // 0' "$tf" 2>/dev/null || echo "0")
+        if [[ "$rcount" -gt 0 ]]; then
+            rework_found=true
+            local rtid
+            rtid=$(jq -r '.id' "$tf")
+            echo -e "  ${YELLOW}${rtid}: ${rcount} rework(s)${NC}"
+        fi
+    done
+    if ! $rework_found; then
+        echo -e "  ${GREEN}Нет reworks${NC}"
     fi
     echo ""
 
