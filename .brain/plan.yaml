@@ -1,0 +1,61 @@
+name: "Widget Display Test"
+complexity: 4
+
+phases:
+  - id: 1
+    name: "Генерация тестового файла"
+    tasks:
+      - id: task-001
+        role: coder
+        prompt: |
+          Context: Это тестовый прогон оркестратора для проверки отображения виджета. Нужно создать простой файл с данными.
+          Command: Создай файл .brain/results/task-001-result.md с содержимым "Phase 1 complete. Test data generated." и текущей датой.
+          Constraints:
+            - НЕ трогай файлы вне owned_files
+            - НЕ устанавливай зависимости
+          Criteria:
+            - Файл .brain/results/task-001-result.md существует
+            - Файл содержит строку "Phase 1 complete"
+          Completion: Результат в .brain/results/task-001-result.md
+        owned_files:
+          - .brain/results/task-001-result.md
+        acceptance_signals:
+          - type: file_exists
+            path: .brain/results/task-001-result.md
+          - type: file_contains
+            path: .brain/results/task-001-result.md
+            pattern: "Phase 1 complete"
+          - type: file_min_lines
+            path: .brain/results/task-001-result.md
+            min_lines: 1
+        timeout: 120
+        on_failure: retry
+
+  - id: 2
+    name: "Валидация результата"
+    tasks:
+      - id: task-002
+        role: tester
+        prompt: |
+          Context: Фаза 1 создала файл .brain/results/task-001-result.md. Нужно проверить что он корректен и написать отчёт.
+          Command: Прочитай .brain/results/task-001-result.md, проверь содержимое и создай отчёт валидации в .brain/results/task-002-result.md.
+          Constraints:
+            - НЕ трогай файлы вне owned_files
+            - НЕ модифицируй результат фазы 1
+          Criteria:
+            - Файл .brain/results/task-002-result.md существует
+            - Файл содержит строку "Validation passed"
+          Completion: Результат в .brain/results/task-002-result.md
+        owned_files:
+          - .brain/results/task-002-result.md
+        acceptance_signals:
+          - type: file_exists
+            path: .brain/results/task-002-result.md
+          - type: file_contains
+            path: .brain/results/task-002-result.md
+            pattern: "Validation passed"
+          - type: file_min_lines
+            path: .brain/results/task-002-result.md
+            min_lines: 1
+        timeout: 120
+        on_failure: retry

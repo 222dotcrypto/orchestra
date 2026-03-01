@@ -1,6 +1,6 @@
 {
   "status": "done",
-  "current_task": "Hello World test",
+  "current_task": "Widget Display Test",
   "class": "4",
   "current_phase": 2,
   "phases": [
@@ -21,9 +21,9 @@
   ],
   "workers_active": 0,
   "tasks_total": 2,
-  "tasks_done": 0,
+  "tasks_done": 2,
   "tasks_failed": 0,
   "next_action": "Завершено",
-  "started_at": "2026-03-01T10:07:22Z",
-  "updated_at": "2026-03-01T10:07:23Z"
+  "started_at": "2026-03-01T16:23:32Z",
+  "updated_at": "2026-03-01T16:26:27Z"
 }

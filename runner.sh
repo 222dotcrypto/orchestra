@@ -888,6 +888,78 @@ EOF
     log "INFO" "state.json инициализирован"
 }
 
+# ─── Автозапись в benchmarks ─────────────────────────────────────────────────
+
+log_benchmark() {
+    local phase_count="$1"
+    local benchmarks_file="memory/benchmarks.md"
+    [[ -f "$benchmarks_file" ]] || return 0
+
+    local name complexity task_total
+    name=$(jq_plan '.name')
+    complexity=$(jq_plan '.complexity')
+    task_total=$(jq_plan '[.phases[].tasks | length] | add')
+
+    # Время выполнения
+    local started_at ended_at duration_str
+    started_at=$(jq -r '.started_at' "${BRAIN_DIR}/state.json")
+    ended_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+    local start_epoch end_epoch duration_sec duration_min
+    start_epoch=$(date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$started_at" +%s 2>/dev/null || echo 0)
+    end_epoch=$(date -u +%s)
+    duration_sec=$((end_epoch - start_epoch))
+    duration_min=$(( (duration_sec + 30) / 60 ))  # округление
+    [[ $duration_min -lt 1 ]] && duration_min=1
+    duration_str="${duration_min} мин"
+
+    # Счётчики
+    local done_count failed_count
+    done_count=$(find "$SIGNALS_DIR" -name "*.done" 2>/dev/null | wc -l | tr -d ' ')
+    failed_count=$(find "$SIGNALS_DIR" -name "*.failed" 2>/dev/null | wc -l | tr -d ' ')
+    local rework_total=0
+    for tf in "${TASKS_DIR}"/*.json; do
+        [[ -f "$tf" ]] || continue
+        local rw
+        rw=$(jq -r '.rework_count // 0' "$tf")
+        rework_total=$((rework_total + rw))
+    done
+
+    # Воркеры (количество worker JSON файлов)
+    local worker_count
+    worker_count=$(find "$WORKERS_DIR" -name "worker-*.json" 2>/dev/null | wc -l | tr -d ' ')
+
+    # Ревью вердикт (последний файл)
+    local review_verdict="н/д"
+    local latest_review
+    latest_review=$(ls -t "${BRAIN_DIR}/review/results/"review-*.md 2>/dev/null | head -1)
+    if [[ -n "$latest_review" ]]; then
+        review_verdict=$(sed -n '/<review-json>/,/<\/review-json>/p' "$latest_review" | grep -v 'review-json' | jq -r '.verdict // "PASS"' 2>/dev/null || echo "PASS")
+    fi
+
+    # Номер прогона (последняя строка таблицы + 1)
+    local last_num
+    last_num=$(grep -E '^\| [0-9]+ \|' "$benchmarks_file" | tail -1 | awk -F'|' '{print $2}' | tr -d ' ')
+    local next_num=$(( ${last_num:-0} + 1 ))
+
+    local today
+    today=$(date +%Y-%m-%d)
+
+    # Добавить строку в таблицу (перед пустой строкой или '*' после таблицы)
+    local new_row="| ${next_num} | ${name} | ${today} | ${complexity} | ${task_total} | ${phase_count} | ${worker_count} | ${duration_str} | ${rework_total} | — | — | н/д | — | — | ${review_verdict} |"
+
+    # Найти последнюю строку таблицы и вставить после неё
+    local last_table_line
+    last_table_line=$(grep -n '^\| [0-9]' "$benchmarks_file" | tail -1 | cut -d: -f1)
+    if [[ -n "$last_table_line" ]]; then
+        sed -i '' "${last_table_line}a\\
+${new_row}" "$benchmarks_file"
+        log "INFO" "Benchmark #${next_num} записан в ${benchmarks_file}"
+    else
+        log "WARN" "Не удалось найти таблицу в ${benchmarks_file}"
+    fi
+}
+
 # ─── Основной цикл ──────────────────────────────────────────────────────────
 
 main() {
@@ -966,6 +1038,9 @@ main() {
 
     # Финальное ревью
     run_reviewer
+
+    # Записать в benchmarks
+    log_benchmark "$phase_count"
 
     # Завершение
     update_state '.status = "done" | .next_action = "Завершено" | .workers_active = 0'

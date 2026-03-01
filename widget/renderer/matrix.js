@@ -20,7 +20,7 @@
     ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#00e676';
+    ctx.fillStyle = '#00FF41';
     ctx.font = fontSize + 'px monospace';
 
     for (let i = 0; i < columns; i++) {

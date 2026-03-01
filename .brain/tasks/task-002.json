@@ -1,0 +1,39 @@
+{
+  "id": "task-002",
+  "phase": 2,
+  "title": "Context: Фаза 1 создала файл .brain/results/task-001-result.md. Нужно проверить что он корректен и написать отчёт.",
+  "description": "Context: Фаза 1 создала файл .brain/results/task-001-result.md. Нужно проверить что он корректен и написать отчёт.\nCommand: Прочитай .brain/results/task-001-result.md, проверь содержимое и создай отчёт валидации в .brain/results/task-002-result.md.\nConstraints:\n  - НЕ трогай файлы вне owned_files\n  - НЕ модифицируй результат фазы 1\nCriteria:\n  - Файл .brain/results/task-002-result.md существует\n  - Файл содержит строку \"Validation passed\"\nCompletion: Результат в .brain/results/task-002-result.md",
+  "role_required": "tester",
+  "assigned_to": "worker-002",
+  "status": "done",
+  "priority": "high",
+  "depends_on": [],
+  "owned_files": [
+    ".brain/results/task-002-result.md"
+  ],
+  "acceptance_criteria": [],
+  "acceptance_signals": [
+    {
+      "type": "file_exists",
+      "path": ".brain/results/task-002-result.md"
+    },
+    {
+      "type": "file_contains",
+      "path": ".brain/results/task-002-result.md",
+      "pattern": "Validation passed"
+    },
+    {
+      "type": "file_min_lines",
+      "path": ".brain/results/task-002-result.md",
+      "min_lines": 1
+    }
+  ],
+  "context_files": [],
+  "result_path": ".brain/results/task-002-result.md",
+  "timeout": 120,
+  "on_failure": "retry",
+  "rework_count": 0,
+  "rework_comment": "",
+  "created_at": "2026-03-01T16:24:53Z",
+  "updated_at": "2026-03-01T16:24:53Z"
+}

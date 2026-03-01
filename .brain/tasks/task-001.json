@@ -1,0 +1,39 @@
+{
+  "id": "task-001",
+  "phase": 1,
+  "title": "Context: Это тестовый прогон оркестратора для проверки отображения виджета. Нужно создать простой файл с данными.",
+  "description": "Context: Это тестовый прогон оркестратора для проверки отображения виджета. Нужно создать простой файл с данными.\nCommand: Создай файл .brain/results/task-001-result.md с содержимым \"Phase 1 complete. Test data generated.\" и текущей датой.\nConstraints:\n  - НЕ трогай файлы вне owned_files\n  - НЕ устанавливай зависимости\nCriteria:\n  - Файл .brain/results/task-001-result.md существует\n  - Файл содержит строку \"Phase 1 complete\"\nCompletion: Результат в .brain/results/task-001-result.md",
+  "role_required": "coder",
+  "assigned_to": "worker-001",
+  "status": "done",
+  "priority": "high",
+  "depends_on": [],
+  "owned_files": [
+    ".brain/results/task-001-result.md"
+  ],
+  "acceptance_criteria": [],
+  "acceptance_signals": [
+    {
+      "type": "file_exists",
+      "path": ".brain/results/task-001-result.md"
+    },
+    {
+      "type": "file_contains",
+      "path": ".brain/results/task-001-result.md",
+      "pattern": "Phase 1 complete"
+    },
+    {
+      "type": "file_min_lines",
+      "path": ".brain/results/task-001-result.md",
+      "min_lines": 1
+    }
+  ],
+  "context_files": [],
+  "result_path": ".brain/results/task-001-result.md",
+  "timeout": 120,
+  "on_failure": "retry",
+  "rework_count": 0,
+  "rework_comment": "",
+  "created_at": "2026-03-01T16:23:32Z",
+  "updated_at": "2026-03-01T16:23:32Z"
+}
