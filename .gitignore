@@ -22,6 +22,12 @@ output/
 .brain/plan.md
 .brain/session-notes.md
 
+# Delegate runtime artifacts (contain absolute paths)
+.brain/delegates/.prompt-*
+.brain/delegates/task-*
+.brain/delegates/results/
+.brain/delegates/signals/
+
 # User-specific settings
 .claude/settings.local.json
 
