@@ -37,10 +37,10 @@
 - Большой промпт (8KB) целиком через `-p` → claude молча не выдаёт результат. Правильно: инструкции → `--system-prompt`, конкретная задача → `-p` (1-2 предложения)
 
 ## Виджет
-- orchestraPath в electron-store = хардкод ~/orchestra. Когда runner.sh работает из другого проекта (например tg-parser/), виджет читает стейл данные из ~/orchestra/.brain/ вместо актуального проекта. Фикс: runner.sh пишет $(pwd) в ~/.orchestra-active-path, виджет проверяет этот файл первым
+- orchestraPath в electron-store = хардкод ~/orchestra. Когда runner.sh работает из другого проекта, виджет читает стейл данные из ~/orchestra/.brain/ вместо актуального проекта. Фикс: runner.sh пишет $(pwd) в ~/.orchestra-active-path, виджет проверяет этот файл первым
 - token-tracker строит projectId из orchestraPath → ищет сессии в неправильной папке .claude/projects/. Фикс автоматический — orchestraPath теперь правильный через active-path
 
-## Прогон #3: tg-parser article_gen
+## Прогон #3: project-A article_gen
 - Параллельные задачи с импортной зависимостью → worker-generator запустился до создания analyzer.py, пришлось читать спек Topic из task JSON. Хрупко — если Topic менялся в процессе, generator работал бы с устаревшей спекой. Правильно: interface-файл с контрактом ДО старта фазы, или разные фазы
 - check_result_suspicious триггерится на технические термины (Error, Exception, fail) в коде обработки ошибок → ложные срабатывания на каждом воркере с try/except. Нужен whitelist или парсинг контекста (ищем "не смог/упал/ошибка при", а не `CalledProcessError`)
 - Anti-pattern `-p` повторился на уровне спецификации: промпт generator содержал `subprocess.run(["claude", "-p", prompt])`, хотя в anti-patterns.md уже был зафиксирован. Planner должен сверяться с anti-patterns.md при генерации промптов
